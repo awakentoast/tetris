@@ -1,13 +1,12 @@
 package com.example.tetris;
 
-
-public class SPiece extends Piece {
+public class SquarePiece extends Piece{
 
     private static final int[][] shape = {{0,1,1,0},
-                                          {1,1,0,0}};
+                                          {0,1,1,0}};
 
-    public SPiece() {
-        super(shape, Block.GREEN);
+    public SquarePiece() {
+        super(shape, Block.YELLOW);
     }
 
     @Override
@@ -17,6 +16,6 @@ public class SPiece extends Piece {
 
     @Override
     public boolean canMoveLeft() {
-        return (getCurrentPos()[0] >= 0);
+        return (getCurrentPos()[0] >= -1);
     }
 }
