@@ -5,11 +5,12 @@
 <?import javafx.scene.text.*?>
 
 <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1000.0" prefWidth="1980.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.tetris.TetrisController">
-   <Canvas fx:id="canvas" height="840.0" layoutX="710.0" layoutY="15.0" onKeyPressed="#controls" width="400.0" />
+   <Canvas fx:id="tetrisScreen" height="840.0" layoutX="710.0" layoutY="15.0" onKeyPressed="#controls" width="400.0" />
    <Text fx:id="startText" fill="#e89f0d" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="5.0" text="Press enter to start" x="660.0" y="400.0">
       <font>
          <Font size="60.0" />
       </font>
    </Text>
+   <Canvas fx:id="holdPieceCanvas" height="160" layoutX="525.0" layoutY="15.0" width="160" />
    <Text fx:id="instructions" strokeType="OUTSIDE" strokeWidth="0.0" x="50.0" y="100.0" />
 </Pane>

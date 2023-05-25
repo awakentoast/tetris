@@ -11,64 +11,74 @@ import javafx.scene.text.Text;
 import java.util.*;
 
 public class TetrisController {
-
+    
     private boolean gameStarted = false;
-    Timer timer = new Timer();
-
-    Random r = new Random();
     private int[][] screen;
-
     private Piece currentPiece;
+    private Piece holdPiece;
+    private boolean pieceHasBeenHeldThisTurn = false;
+    
+    
+    Timer timer = new Timer();
+    Random r = new Random();
+    
 
+    
     @FXML
-    private Canvas canvas;
+    private Canvas holdPieceCanvas;
+    
     @FXML
-    private GraphicsContext graphicsContext;
+    private Canvas tetrisScreen;
+    @FXML
+    private GraphicsContext tetrisDraw;
+    @FXML
+    private GraphicsContext holdPieceDraw;
 
     @FXML
     private Text startText;
 
     @FXML
     private Text instructions;
+    
 
 
 
 
     private void drawScreen() {
-        graphicsContext.setFill(Color.BLACK);
-        graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        graphicsContext.setFill(Color.WHITE);
-        graphicsContext.fillRect(0, 0, canvas.getWidth(), (double) 4 * Block.SIZE);
-        graphicsContext.setStroke(Color.GRAY);
+        tetrisDraw.setFill(Color.BLACK);
+        tetrisDraw.fillRect(0, 0, tetrisScreen.getWidth(), tetrisScreen.getHeight());
+        tetrisDraw.setFill(Color.WHITE);
+        tetrisDraw.fillRect(0, 0, tetrisScreen.getWidth(), (double) 4 * Block.SIZE);
+        tetrisDraw.setStroke(Color.GRAY);
 
         //draw vertical lines
         for (int x = 1; x < 10; x++) {
-            graphicsContext.strokeLine((double) x * Block.SIZE, (double) 1 + 4 * Block.SIZE, (double) x * Block.SIZE, 999);
+            tetrisDraw.strokeLine((double) x * Block.SIZE, (double) 1 + 4 * Block.SIZE, (double) x * Block.SIZE, 999);
         }
         
         //draw horizontal lines
         for (int y = 4; y < 24; y++) {
-            graphicsContext.strokeLine(0, (double) y * Block.SIZE,500, (double) y * Block.SIZE);
+            tetrisDraw.strokeLine(0, (double) y * Block.SIZE,500, (double) y * Block.SIZE);
         }
         
-        graphicsContext.setStroke(Color.BLACK);
+        tetrisDraw.setStroke(Color.BLACK);
         
         for (int y = 0; y < 24; y++) {
             for (int x = 0; x < 10; x++) {
                 if (screen[y][x] != 0) {
                     switch (screen[y][x]) {
-                        case Block.DARKBLUE -> graphicsContext.setFill(Color.DARKBLUE);
-                        case Block.TEAL -> graphicsContext.setFill(Color.TEAL);
-                        case Block.ORANGE -> graphicsContext.setFill(Color.ORANGE);
-                        case Block.GREEN -> graphicsContext.setFill(Color.GREEN);
-                        case Block.YELLOW -> graphicsContext.setFill(Color.YELLOW);
-                        case Block.MAGENTA -> graphicsContext.setFill(Color.MAGENTA);
-                        case Block.RED -> graphicsContext.setFill(Color.RED);
+                        case Block.DARKBLUE -> tetrisDraw.setFill(Color.DARKBLUE);
+                        case Block.TEAL -> tetrisDraw.setFill(Color.TEAL);
+                        case Block.ORANGE -> tetrisDraw.setFill(Color.ORANGE);
+                        case Block.GREEN -> tetrisDraw.setFill(Color.GREEN);
+                        case Block.YELLOW -> tetrisDraw.setFill(Color.YELLOW);
+                        case Block.MAGENTA -> tetrisDraw.setFill(Color.MAGENTA);
+                        case Block.RED -> tetrisDraw.setFill(Color.RED);
                         default -> System.out.println("you did wrong in draw board switch color assignment to gc");
                     }
 
-                    graphicsContext.fillRect((double) x * Block.SIZE + 1, (double) y * Block.SIZE + 1, (double) Block.SIZE - 2, (double) Block.SIZE - 2);
-                    graphicsContext.strokeRect((double) x * Block.SIZE + 2, (double) y * Block.SIZE + 2, (double) Block.SIZE - 3, (double) Block.SIZE - 3);
+                    tetrisDraw.fillRect((double) x * Block.SIZE + 1, (double) y * Block.SIZE + 1, (double) Block.SIZE - 2, (double) Block.SIZE - 2);
+                    tetrisDraw.strokeRect((double) x * Block.SIZE + 2, (double) y * Block.SIZE + 2, (double) Block.SIZE - 3, (double) Block.SIZE - 3);
                 }
             }
         }
@@ -89,8 +99,6 @@ public class TetrisController {
                 screen[i + linesToClear.size()] = screen[i].clone();
             }
         }
-
-        drawScreen();
     }
 
     private void tick() {
@@ -99,7 +107,6 @@ public class TetrisController {
         } else {
             pieceCantMoveAnymore();
         }
-
     }
 
     public void gameplayLoop() {
@@ -109,8 +116,14 @@ public class TetrisController {
                 tick();
             }
         }, 0, 1000);
+        
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                drawScreen();
+            }
+        }, 0, 17);
     }
-
 
     private void updateBlockPosition(String direction) {
         int colour = currentPiece.getColour();
@@ -145,8 +158,6 @@ public class TetrisController {
                 }
             }
         }
-
-        drawScreen();
     }
     
     private void rotateBlock(String rotation) {
@@ -183,15 +194,35 @@ public class TetrisController {
                 }
             }
         }
+    }
+    
+    private void removeCurrentPieceFromScreen() {
+        int[] currentPos = currentPiece.getCurrentPos();
+        int[][] shapeBlock = currentPiece.getShape();
         
-        drawScreen();
+        for (int y = 0; y < 4; y++) {
+            for (int x = 0; x < 4; x++) {
+                if (shapeBlock[y][x] != 0) {
+                    screen[y + currentPos[1]][x + currentPos[0]] = 0;
+                }
+            }
+        }
     }
     
     
     private void pieceCantMoveAnymore() {
         checkForTetris();
         currentPiece = Piece.getRandomPiece();
-        drawScreen();
+        int[][] shapePiece = currentPiece.getShape();
+        int colour = currentPiece.getColour();
+        for (int y = 0; y < 4; y++) {
+            for (int x = 0; x < 4; x++) {
+                if (shapePiece[y][x] == 1) {
+                    screen[y][x + 3] = colour;
+                }
+            }
+        }
+        pieceHasBeenHeldThisTurn = false;
     }
 
 
@@ -207,7 +238,6 @@ public class TetrisController {
                     }
                 }
             }
-            drawScreen();
             gameplayLoop();
         }
 
@@ -250,15 +280,63 @@ public class TetrisController {
                     rotateBlock("COUNTER CLOCKWISE");
                 }
             }
+            
+            if (keyEvent.getCode().equals(KeyCode.SHIFT)) {
+                if (!pieceHasBeenHeldThisTurn) {
+                    pieceHasBeenHeldThisTurn = true;
+                    removeCurrentPieceFromScreen();
+                    if (holdPiece == null) {
+                        holdPiece = currentPiece;
+                        holdPiece.setManualNewShape(0);
+                        currentPiece = Piece.getRandomPiece();
+                    } else {
+                        Piece tempPiece = currentPiece;
+                        currentPiece = holdPiece;
+                        holdPiece = tempPiece;
+                        holdPiece.setManualNewShape(0);
+                        
+                    }
+                    drawHoldPiece();
+                }
+            }
         }
+    }
+    
+    private void drawHoldPiece() {
+        holdPieceDraw.setFill(Color.WHITE);
+        holdPieceDraw.fillRect(0, 0, holdPieceCanvas.getWidth(), holdPieceCanvas.getHeight());
+        int colour = holdPiece.getColour();
+        int[][] shapePiece = holdPiece.getShape();
+        
+        switch (colour) {
+            case Block.DARKBLUE -> holdPieceDraw.setFill(Color.DARKBLUE);
+            case Block.TEAL -> holdPieceDraw.setFill(Color.TEAL);
+            case Block.ORANGE -> holdPieceDraw.setFill(Color.ORANGE);
+            case Block.GREEN -> holdPieceDraw.setFill(Color.GREEN);
+            case Block.YELLOW -> holdPieceDraw.setFill(Color.YELLOW);
+            case Block.MAGENTA -> holdPieceDraw.setFill(Color.MAGENTA);
+            case Block.RED -> holdPieceDraw.setFill(Color.RED);
+            default -> System.out.println("you did wrong in draw board switch color assignment to gc");
+        }
+        
+        for (int y = 0; y < 4; y++) {
+            for (int x = 0; x < 4; x++) {
+                if (shapePiece[y][x] == 1) {
+                    holdPieceDraw.fillRect((double) x * Block.SIZE + 1, (double) y * Block.SIZE + 1, (double) Block.SIZE - 2, (double) Block.SIZE - 2);
+                    holdPieceDraw.strokeRect((double) x * Block.SIZE + 2, (double) y * Block.SIZE + 2, (double) Block.SIZE - 3, (double) Block.SIZE - 3);
+                }
+            }
+        }
+        
     }
 
     public void initialize() {
-        graphicsContext = canvas.getGraphicsContext2D();
+        tetrisDraw = tetrisScreen.getGraphicsContext2D();
+        holdPieceDraw = holdPieceCanvas.getGraphicsContext2D();
         screen = new int[24][10];
-        canvas.setFocusTraversable(true);
+        tetrisScreen.setFocusTraversable(true);
         setInstructions();
-
+        
         drawScreen();
         currentPiece = Piece.getRandomPiece();
     }

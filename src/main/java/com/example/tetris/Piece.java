@@ -38,6 +38,10 @@ public abstract class Piece {
     public void setNewShape() {
         shape = shapes.get(currentShape);
     }
+    
+    public void setManualNewShape(int shapeIndex) {
+        shape = shapes.get(shapeIndex);
+    }
 
     public int getColour() {
         return colour;
@@ -132,7 +136,7 @@ public abstract class Piece {
             }
         }
         
-        int[][] tempShape = new int[4][];
+        int[][] tempShape = new int[4][4];
         
         switch (rotation) {
             case "COUNTER CLOCKWISE" -> {
@@ -153,7 +157,10 @@ public abstract class Piece {
         for (int y = 0; y < 4; y++) {
             for (int x = 0; x < 4; x++) {
                 if (tempShape[y][x] == 1) {
-                    if (tempScreen[y][x] != 0) {
+                    if (x + currentPos[0] > 9 || y + currentPos[1] > 20 || x + currentPos[0] < 0) {
+                        return false;
+                    }
+                    if (tempScreen[y + currentPos[1]][x + currentPos[0]] != 0) {
                         return false;
                     }
                 }
