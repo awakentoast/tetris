@@ -1,8 +1,5 @@
 package com.example.tetris;
 
-import javafx.scene.paint.Color;
-
-
 public class Block {
     public static final int DARKBLUE = 1;
     public static final int TEAL = 2;
@@ -11,14 +8,10 @@ public class Block {
     public static final int YELLOW = 5;
     public static final int MAGENTA = 6;
     public static final int RED = 7;
-
-    public static final int SIZE = 50;
-    private final Color colour;
-
-
-
-
-    public Block(Color colour) {
-        this.colour = colour;
+    
+    public static final int SIZE = 40;
+    
+    private Block() {
+    
     }
 }

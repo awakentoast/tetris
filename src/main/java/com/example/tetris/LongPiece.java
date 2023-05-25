@@ -1,22 +1,35 @@
 package com.example.tetris;
 
 
-public class LongPiece extends Piece {
+import java.util.ArrayList;
+import java.util.Arrays;
 
-    private static final int[][] shape = {{0,0,0,0},
-                                          {1,1,1,1}};
+public class LongPiece extends Piece {
+    
+    private static final int[][] shape1 = { {0, 0, 0, 0},
+                                            {1, 1, 1, 1},
+                                            {0, 0, 0, 0},
+                                            {0, 0, 0, 0}};
+    
+    private static final int[][] shape2 = { {0, 0, 1, 0},
+                                            {0, 0, 1, 0},
+                                            {0, 0, 1, 0},
+                                            {0, 0, 1, 0}};
+    
+    
+    private static final int[][] shape3 = { {0, 0, 0, 0},
+                                            {0, 0, 0, 0},
+                                            {1, 1, 1, 1},
+                                            {0, 0, 0, 0}};
+    
+    
+    private static final int[][] shape4 = { {0, 1, 0, 0},
+                                            {0, 1, 0, 0},
+                                            {0, 1, 0, 0},
+                                            {0, 1, 0, 0}};
 
     public LongPiece() {
-        super(shape, Block.TEAL);
+        super(new ArrayList<>(Arrays.asList(shape1, shape2, shape3, shape4)), Block.TEAL);
     }
 
-    @Override
-    public boolean canMoveRight() {
-        return (getCurrentPos()[0] <= 5);
-    }
-
-    @Override
-    public boolean canMoveLeft() {
-        return (getCurrentPos()[0] >= 0);
-    }
 }

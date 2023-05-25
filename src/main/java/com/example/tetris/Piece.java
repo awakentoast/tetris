@@ -1,27 +1,42 @@
 package com.example.tetris;
 
+import java.util.ArrayList;
+import java.util.Random;
 
 public abstract class Piece {
 
-    public static final String[] allPieces = {"JPiece", "LongPiece", "LPiece", "SPiece", "SquarePiece", "TPiece", "ZPiece"};
-
-    private final int[][] shape;
+    static Random r = new Random();
+    private int[][] shape;
     private final int colour;
-    private int[] currentPos = {3,0};
+    protected int[] currentPos = {3, 0};
+    protected ArrayList<int[][]> shapes;
+    
+    private int currentShape = 0;
+    
+    
 
 
-
-    protected Piece(int[][] shape, int colour) {
-        this.shape = shape;
+    protected Piece(ArrayList<int[][]> shapes, int colour) {
+        this.shape = shapes.get(0);
+        this.shapes = shapes;
         this.colour = colour;
     }
 
-    public abstract boolean  canMoveRight();
-
-    public abstract boolean canMoveLeft();
-
     public int[][] getShape() {
         return shape;
+    }
+    
+    public void rotateClockWise() {
+        currentShape = currentShape == 3 ? 0 : ++currentShape;
+    }
+    
+    
+    public void rotateCounterClockWise() {
+        currentShape = currentShape == 0 ? 3 : --currentShape;
+    }
+    
+    public void setNewShape() {
+        shape = shapes.get(currentShape);
     }
 
     public int getColour() {
@@ -36,19 +51,115 @@ public abstract class Piece {
         this.currentPos = currentPos;
     }
 
-    public static Piece getPiece(String piece) {
-        return switch (piece) {
-            case "JPiece" -> new JPiece();
-            case "LongPiece" -> new LongPiece();
-            case "LPiece" -> new LPiece();
-            case "SPiece" -> new SPiece();
-            case "SquarePiece" -> new SquarePiece();
-            case "TPiece" -> new TPiece();
-            case "ZPiece" -> new ZPiece();
-            default -> throw new IllegalArgumentException("Invalid piece: " + piece);
+    public static Piece getRandomPiece() {
+        return switch (r.nextInt(7)) {
+            case 0 -> new JPiece();
+            case 1 -> new LongPiece();
+            case 2 -> new LPiece();
+            case 3 -> new SPiece();
+            case 4 -> new SquarePiece();
+            case 5 -> new TPiece();
+            case 6 -> new ZPiece();
+            default -> throw new IllegalArgumentException("Invalid piece:");
         };
     }
 
+    protected boolean pieceCanMove(int[][] screen, String direction) {
+        int xNew = 0;
+        int yNew = 0;
+        int[][] tempScreen = new int[screen.length][screen[0].length];
+
+        for (int i = 0; i < screen.length; i++) {
+            tempScreen[i] = screen[i].clone();
+        }
+
+        for (int y = 0; y < 4; y++) {
+            for (int x = 0; x < 4; x++) {
+                if (shape[y][x] != 0) {
+                    tempScreen[y + currentPos[1]][x + currentPos[0]] = 0;
+                }
+            }
+        }
+       
+        switch (direction) {
+            case "LEFT" -> {
+                xNew = currentPos[0] - 1;
+                yNew = currentPos[1];
+            }
+
+            case "RIGHT" -> {
+                xNew = currentPos[0] + 1;
+                yNew = currentPos[1];
+            }
+
+            case "DOWN" -> {
+                xNew = currentPos[0];
+                yNew = currentPos[1] + 1;
+            }
+
+            default -> System.out.println("error in pieceCanMove class Piece");
+        }
 
 
+        for (int y = 0; y < 4; y++) {
+            for (int x = 0; x < 4; x++) {
+                if (shape[y][x] == 1) {
+                    if (x + xNew > 9 || y + yNew > 20 || x + xNew < 0) {
+                        return false;
+                    }
+                    if (tempScreen[y + yNew][x + xNew] != 0) {
+                        return false;
+                    }
+                }
+            }
+        }
+        
+        return true;
+    }
+    
+    public boolean pieceCanRotate(int[][] screen, String rotation) {
+        int[][] tempScreen = new int[screen.length][screen[0].length];
+        
+        for (int i = 0; i < screen.length; i++) {
+            tempScreen[i] = screen[i].clone();
+        }
+        
+        for (int y = 0; y < 4; y++) {
+            for (int x = 0; x < 4; x++) {
+                if (shape[y][x] != 0) {
+                    tempScreen[y + currentPos[1]][x + currentPos[0]] = 0;
+                }
+            }
+        }
+        
+        int[][] tempShape = new int[4][];
+        
+        switch (rotation) {
+            case "COUNTER CLOCKWISE" -> {
+                rotateCounterClockWise();
+                tempShape = shapes.get(currentShape);
+                rotateClockWise();
+            }
+            
+            case "CLOCKWISE" -> {
+                rotateClockWise();
+                tempShape = shapes.get(currentShape);
+                rotateCounterClockWise();
+            }
+            
+            default -> System.out.println("error in piece can rotate");
+        }
+        
+        for (int y = 0; y < 4; y++) {
+            for (int x = 0; x < 4; x++) {
+                if (tempShape[y][x] == 1) {
+                    if (tempScreen[y][x] != 0) {
+                        return false;
+                    }
+                }
+            }
+        }
+        
+        return true;
+    }
 }
